@@ -4,14 +4,15 @@ Require python files from everywhere
 """
 
 import importlib
-import requests
+from urllib.parse import urlparse
+from types import ModuleType
 import subprocess
 import sys
 import os
-from urllib.parse import urlparse
-from types import ModuleType
+import requests
 
-clear = lambda : os.system('cls||clear')
+def clear () -> None:
+    os.system('cls||clear')
 
 def is_not_installed (package: str) -> bool:
     """Returns True if a PyPI is not installed"""
