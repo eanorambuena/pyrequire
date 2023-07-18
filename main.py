@@ -1,4 +1,13 @@
-import importlib, requests, subprocess, sys, os
+"""
+pyrequire
+Require python files from everywhere
+"""
+
+import importlib
+import requests
+import subprocess
+import sys
+import os
 from urllib.parse import urlparse
 from types import ModuleType
 
@@ -7,8 +16,8 @@ clear = lambda : os.system('cls||clear')
 def is_not_installed (package: str) -> bool:
     """Returns True if a PyPI is not installed"""
     spec = importlib.util.find_spec(package)
-    loweredSpec = importlib.util.find_spec(package.lower())
-    if (spec is None) and (loweredSpec is None): 
+    lowered_spec = importlib.util.find_spec(package.lower())
+    if (spec is None) and (lowered_spec is None): 
         return True
     return False
 
@@ -20,19 +29,19 @@ def install_from_pypi (package: str) -> None:
         else:
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
 
-def install_from_github (userOrOrganization: str, packages: list) -> None:
+def install_from_github (user_or_organization: str, packages: list) -> None:
     """Install a package from github.com"""
     for package in packages:
-        url = f"git+https://github.com/{userOrOrganization}/{package}.git#egg={package}"
+        url = f"git+https://github.com/{user_or_organization}/{package}.git#egg={package}"
         install_from_pypi(url)
 
 def install (*packages: str) -> None:
     """Install packages from PyPI or github.com"""
     for package in packages:
         if "@" in package:
-            userOrOrganization = package.split("@")[1]
+            user_or_organization = package.split("@")[1]
             package_names = package.split("@")[0].split(",")
-            install_from_github(userOrOrganization, package_names)
+            install_from_github(user_or_organization, package_names)
         else:
             install_from_pypi(package)
 
@@ -45,8 +54,8 @@ def get_code (url: str) -> dict:
         "name": ""
     }                 
     if url.startswith("file:///"):
-        with open(url[8:]) as f:
-            result["content"] = f.read()
+        with open(url[8:], "r", encoding="utf-8") as file:
+            result["content"] = file.read()
         result["origin"] = "local"
         result["name"] = url[8:].replace("/", "_").replace(":", "").replace(".", "_")[:-3]
     else:
@@ -56,19 +65,20 @@ def get_code (url: str) -> dict:
         result["origin"] = "remote"
         parsed_url = urlparse(url)
         hostname = parsed_url.hostname.split(".")[::-1]
-        result["name"] = "_".join(hostname) + parsed_url.path.replace("/", "_").replace(".", "_")[:-3]
+        path = parsed_url.path.replace("/", "_").replace(".", "_")[:-3]
+        result["name"] = "_".join(hostname) + path
     return result
 
-def require (url: str) -> ModuleType | None:
+def require (url: str) -> ModuleType or None:
     """Returns a module from a url"""
     if not os.path.exists("modules"):
         os.mkdir("modules")
-    r = get_code(url)
-    with open(f"modules/{r['name']}.py", "w") as f:
-        f.write(r["content"])
+    result = get_code(url)
+    with open(f"modules/{result['name']}.py", "w", encoding="utf-8") as file:
+        file.write(result["content"])
     try:
-        module = __import__(f"modules.{r['name']}")
+        module = __import__(f"modules.{result['name']}")
         return module
-    except ModuleNotFoundError as e:
-        print(f"{r['name']} requires package {e.name} to be installed")
+    except ModuleNotFoundError as error:
+        print(f"{result['name']} requires package {error.name} to be installed")
         return None
