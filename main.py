@@ -1,9 +1,10 @@
 import importlib, requests, subprocess, sys, os
 from urllib.parse import urlparse
+from types import ModuleType
 
 clear = lambda : os.system('cls||clear')
 
-def is_not_installed(package):
+def is_not_installed (package: str) -> bool:
     """Returns True if a PyPI is not installed"""
     spec = importlib.util.find_spec(package)
     loweredSpec = importlib.util.find_spec(package.lower())
@@ -11,21 +12,21 @@ def is_not_installed(package):
         return True
     return False
 
-def install_from_pypi(name):
+def install_from_pypi (package: str) -> None:
     """Install a package from PyPI"""
-    if is_not_installed(name):
-        if name == "pip":
+    if is_not_installed(package):
+        if package == "pip":
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
         else:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', name])
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
 
-def install_from_github(userOrOrganization: str, packages: list):
+def install_from_github (userOrOrganization: str, packages: list) -> None:
     """Install a package from github.com"""
     for package in packages:
         url = f"git+https://github.com/{userOrOrganization}/{package}.git#egg={package}"
         install_from_pypi(url)
 
-def install (*packages):
+def install (*packages: str) -> None:
     """Install packages from PyPI or github.com"""
     for package in packages:
         if "@" in package:
@@ -35,7 +36,7 @@ def install (*packages):
         else:
             install_from_pypi(package)
 
-def get_code (url):
+def get_code (url: str) -> dict:
     """Returns the code of a file from a url"""
     result = {
         "content": "",
@@ -58,7 +59,7 @@ def get_code (url):
         result["name"] = "_".join(hostname) + parsed_url.path.replace("/", "_").replace(".", "_")[:-3]
     return result
 
-def require (url):
+def require (url: str) -> ModuleType | None:
     """Returns a module from a url"""
     if not os.path.exists("modules"):
         os.mkdir("modules")
@@ -71,4 +72,3 @@ def require (url):
     except ModuleNotFoundError as e:
         print(f"{r['name']} requires package {e.name} to be installed")
         return None
-
