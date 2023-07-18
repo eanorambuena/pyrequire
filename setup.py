@@ -3,7 +3,6 @@ import io
 import os
 from setuptools import find_packages, setup
 
-
 def read(*paths, **kwargs):
     """Read the contents of a text file safely.
     >>> read("project_name", "VERSION")
@@ -22,6 +21,7 @@ def read(*paths, **kwargs):
 
 
 def read_requirements(path):
+    """Parse requirements from requirements.txt"""
     return [
         line.strip()
         for line in read(path).split("\n")
