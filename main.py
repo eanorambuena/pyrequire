@@ -9,6 +9,7 @@ from types import ModuleType
 import subprocess
 import sys
 import os
+import requests
 
 def clear () -> None:
     """Clears the terminal"""
@@ -47,8 +48,6 @@ def install (*packages: str) -> None:
             install_from_pypi(package)
 
 def get_code (url: str) -> dict:
-    install("requests")
-    import requests
     """Returns the code of a file from a url"""
     result = {
         "content": "",
