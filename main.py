@@ -9,16 +9,16 @@ from types import ModuleType
 import subprocess
 import sys
 import os
-import requests
 
 def clear () -> None:
+    """Clears the terminal"""
     os.system('cls||clear')
 
 def is_not_installed (package: str) -> bool:
     """Returns True if a PyPI is not installed"""
     spec = importlib.util.find_spec(package)
     lowered_spec = importlib.util.find_spec(package.lower())
-    if (spec is None) and (lowered_spec is None): 
+    if (spec is None) and (lowered_spec is None):
         return True
     return False
 
@@ -47,13 +47,15 @@ def install (*packages: str) -> None:
             install_from_pypi(package)
 
 def get_code (url: str) -> dict:
+    install("requests")
+    import requests
     """Returns the code of a file from a url"""
     result = {
         "content": "",
         "content_type": "text/plain; charset=utf-8",
         "origin": "",
         "name": ""
-    }                 
+    }
     if url.startswith("file:///"):
         with open(url[8:], "r", encoding="utf-8") as file:
             result["content"] = file.read()
